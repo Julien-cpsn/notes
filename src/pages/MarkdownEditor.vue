@@ -15,10 +15,10 @@
 		    <q-btn flat size="sm" padding="xs" icon="drive_file_rename_outline" @click="formatSelectionDouble('==')">
           <q-tooltip class="text-no-wrap">Surligner du texte – <b>ctrl + h</b></q-tooltip>
         </q-btn>
-        <q-btn flat size="sm" padding="xs" icon="subscript" @click="formatSelectionDouble('~')">
+        <q-btn v-show="advancedToolbar" flat size="sm" padding="xs" icon="subscript" @click="formatSelectionDouble('~')">
           <q-tooltip class="text-no-wrap">Sous-texte</q-tooltip>
         </q-btn>
-        <q-btn flat size="sm" padding="xs" icon="superscript" @click="formatSelectionDouble('^')">
+        <q-btn v-show="advancedToolbar" flat size="sm" padding="xs" icon="superscript" @click="formatSelectionDouble('^')">
           <q-tooltip class="text-no-wrap">Exposant</q-tooltip>
         </q-btn>
       </div>
@@ -123,6 +123,7 @@
           </q-tooltip>
         </q-btn-dropdown>
 
+        <!-- SYMBOLES -->
         <q-btn-dropdown flat size="sm" padding="xs" icon="emoji_symbols" class="without-dropdown-icon" no-caps>
           <template v-slot:label>
             <q-tooltip class="text-no-wrap">Insérer un symbole</q-tooltip>
@@ -142,9 +143,30 @@
             </q-item>
           </q-list>
         </q-btn-dropdown>
-	  </div>
 
-	  <q-separator vertical class="q-mx-xs" style="width: 0.5px;"/>
+        <!-- EMOJIS -->
+        <q-btn-dropdown v-show="advancedToolbar" flat size="sm" padding="xs" icon="insert_emoticon" class="without-dropdown-icon" no-caps>
+          <template v-slot:label>
+            <q-tooltip class="text-no-wrap">Insérer un emoji</q-tooltip>
+          </template>
+
+          <q-list dense class="flex row justify-between" style="max-width: 160px">
+            <q-item
+              v-for="emoji in everyEmoji"
+              :key="emoji[0]"
+
+              style="padding: 0!important; height: 32px!important; width: 32px;!important;"
+
+              clickable
+              @click="formatSelectionSimple(emoji[0])"
+            >
+              <q-item-label class="q-mx-auto q-my-auto text-center">{{ emoji[1] }}</q-item-label>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+	    </div>
+
+	    <q-separator vertical class="q-mx-xs" style="width: 0.5px;"/>
 
       <div class="q-mx-xs">
         <!-- INLINE CODE -->
@@ -168,7 +190,7 @@
         </q-btn>
 
         <!-- MERMAID DIAGRAM -->
-        <q-btn flat size="sm" padding="xs" icon="account_tree" @click="formatSelectionSimple('```mermaid Optional Title\ngraph TD\nA[Christmas] -->|Get money| B(Go shopping)\nB --> C{Let me think}\nC -->|One| D[Laptop]\nC -->|Two| E[test]\nC -->|Three| F[Car]\n```')">
+        <q-btn v-show="advancedToolbar" flat size="sm" padding="xs" icon="account_tree" @click="formatSelectionSimple('```mermaid Optional Title\ngraph TD\nA[Christmas] -->|Get money| B(Go shopping)\nB --> C{Let me think}\nC -->|One| D[Laptop]\nC -->|Two| E[test]\nC -->|Three| F[Car]\n```')">
           <q-tooltip class="text-no-wrap">Insérer un diagramme MERMAID</q-tooltip>
         </q-btn>
       </div>
@@ -179,6 +201,12 @@
         <q-btn flat size="sm" padding="xs" icon="content_copy" @click="copyMarkdownToClipboard">
           <q-tooltip class="text-no-wrap">Copier – <b>ctrl + c</b></q-tooltip>
         </q-btn>
+
+        <q-btn flat size="sm" padding="xs" icon="file_upload" @click="pickFiles">
+          <q-tooltip class="text-no-wrap">Importer un fichier</q-tooltip>
+        </q-btn>
+        <q-file ref="importMarkdownPicker" class="hidden" accept=".md" v-model="importMarkdown" @update:model-value="importMarkdownFile" @rejected="rejectFile"/>
+
         <q-btn flat size="sm" padding="xs" icon="file_download" @click="saveMarkdownFile" :disable="!$store.getters['markdown/isFileNameValid']">
           <q-tooltip class="text-no-wrap">Télécharger le fichier – <b>ctrl + s</b></q-tooltip>
         </q-btn>
@@ -190,11 +218,18 @@
         <q-btn flat size="sm" padding="xs" icon="picture_as_pdf" @click="saveMarkdownAsPdf" :disable="!$store.getters['markdown/isFileNameValid']">
           <q-tooltip class="text-no-wrap">Télécharger au format PDF</q-tooltip>
         </q-btn>
-        <q-btn flat size="sm" padding="xs" icon="html" @click="exportToHtmlDialog = true" :disable="!$store.getters['markdown/isFileNameValid']">
+
+        <q-btn v-show="advancedToolbar" flat size="sm" padding="xs" icon="html" @click="exportToHtmlDialog = true" :disable="!$store.getters['markdown/isFileNameValid']">
           <q-tooltip class="text-no-wrap">Télécharger au format HTML</q-tooltip>
         </q-btn>
       </div>
+
+      <div class="q-ml-auto q-mr-sm">
+        <span class="text-caption text-grey-8 q-mr-sm">Avancé</span>
+        <q-toggle dense size="xs" v-model="advancedToolbar"/>
+      </div>
     </div>
+
     <q-splitter
       v-model="splitterModel"
       :limits="[25, 75]"
@@ -229,7 +264,12 @@
         />
       </template>
       <template v-slot:after>
-	    <q-scroll-area ref="markdownScrollArea" style="height: 88vh; border-left: 1px solid rgba(0, 0, 0, 0.12); border-top: 1px solid rgba(0, 0, 0, 0.12); border-left: none !important" :visible="false" :thumb-style="{ display: 'none' }">
+	    <q-scroll-area
+        ref="markdownScrollArea"
+        style="height: 88vh; border-left: 1px solid rgba(0, 0, 0, 0.12); border-top: 1px solid rgba(0, 0, 0, 0.12); border-left: none !important"
+        :visible="false"
+        :thumb-style="{ display: 'none' }"
+      >
           <q-markdown
             :src="editorText"
             class="full-width full-height markdown text-left q-pt-sm q-px-lg q-pb-sm"
@@ -237,6 +277,8 @@
 	    </q-scroll-area>
       </template>
     </q-splitter>
+
+    <!-- EXPORT HTML -->
     <q-dialog v-model="exportToHtmlDialog">
       <q-card>
         <q-card-section>
@@ -274,6 +316,7 @@ import * as textFieldEdit from 'text-field-edit';
 import * as indentation from 'indent-textarea';
 import showdown from 'showdown'
 import showdownMermaid from 'showdown-mermaid'
+import { everyEmoji } from "src/store/emojis-list";
 
 export default defineComponent({
   name: "MarkdownEditor",
@@ -282,10 +325,11 @@ export default defineComponent({
   },
   setup() {
     window.Prism.languages = require('../../public/prism/prism')
+    window.Prism.disableWorkerMessageHandler = true
 
-    const markdownScrollArea = ref(null)
     const insertArraySize = ref({ x: 2, y: 2 })
 	  const link = ref({ text: '', link: '' })
+    const importMarkdown = ref()
     const exportToHtmlDialog = ref(false)
     const exportToHtmlTheme = ref(0)
 
@@ -318,12 +362,13 @@ export default defineComponent({
 
     return {
       splitterModel: ref(45),
-	    markdownScrollArea,
       insertArraySize,
 	    link,
+      importMarkdown,
       exportToHtmlDialog,
       exportToHtmlTheme,
-      specialCharacters
+      specialCharacters,
+      everyEmoji
     }
   },
   mounted() {
@@ -333,11 +378,11 @@ export default defineComponent({
       }
     })
 
-	indentation.watch(this.$refs.editorArea)
+	  indentation.watch(this.$refs.editorArea)
     this.$refs.editorArea.addEventListener(
       'scroll',
       (value) => {
-          this.markdownScrollArea.setScrollPosition('vertical', value.target.scrollTop * 0.995 * this.markdownScrollArea.getScroll().verticalSize / value.target.scrollHeight);
+          this.$refs.markdownScrollArea.setScrollPercentage('vertical', value.target.scrollTop / value.target.scrollHeight + 0.04);
         },
       true
     )
@@ -354,6 +399,14 @@ export default defineComponent({
     },
     fileName() {
       return this.$store.state.markdown.fileName
+    },
+    advancedToolbar: {
+      get() {
+        return this.$store.state.user.advancedToolbar
+      },
+      set(value) {
+        this.$store.commit('user/setAdvancedToolbar', value)
+      }
     },
     validateArraySize() {
       return /^[1-9][0-9]?$/.test(this.insertArraySize.x.toString()) && /^[1-9][0-9]?$/.test(this.insertArraySize.y.toString())
@@ -420,6 +473,23 @@ export default defineComponent({
             timeout: 400
           })
         })
+    },
+    importMarkdownFile() {
+      const reader = new FileReader()
+      reader.readAsText(this.importMarkdown, "UTF-8")
+      reader.onload = (evt) => {
+        this.editorText = evt.target.result
+      }
+    },
+    pickFiles() {
+      this.$refs.importMarkdownPicker.pickFiles()
+    },
+    rejectFile() {
+      Notify.create({
+        message: "Le fichier doit être au format Markdown (.md)",
+        type: "warning",
+        icon: "warning",
+      })
     },
     saveMarkdownFile() {
       if (!this.$store.getters['markdown/isFileNameValid']) {
@@ -521,6 +591,7 @@ window.onkeydown = (e) => {
   background-color: transparent!important
 
 pre[class*=language-]
+  background-color: transparent!important
   padding: 5px 5px!important
   margin: 0!important
 

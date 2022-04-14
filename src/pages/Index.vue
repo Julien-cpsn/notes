@@ -16,7 +16,7 @@
                   <q-btn flat round color="light" icon="preview" @click="openMarkdown">
                     <q-tooltip>Prévisualiser des notes</q-tooltip>
                   </q-btn>
-                  <q-file ref="openMarkdown" class="hidden" accept=".md" v-model="markdownFile" @update:model-value="openMarkdownPreviewDialog" @rejected="rejectFile"/>
+                    <q-file ref="openMarkdown" class="hidden" accept=".md" v-model="markdownFile" @update:model-value="openMarkdownPreviewDialog" @rejected="rejectFile"/>
                 </q-card-actions>
               </div>
             </q-img>

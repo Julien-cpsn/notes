@@ -5,3 +5,7 @@ export function toggleDarkMode (state) {
 export function setThemeColor(state, color) {
   state.themeColor = color
 }
+
+export function setAdvancedToolbar(state, advanced) {
+  state.advancedToolbar = advanced
+}

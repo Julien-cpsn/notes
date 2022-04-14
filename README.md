@@ -1,37 +1,16 @@
-# Notes (notes)
+# Notes
 
-App to take notes in markdown
+By @Julien-cpsn
 
-## Install the dependencies
+WEB App to take notes :memo:
 
-```bash
-npm install
-```
+Make with :
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+- Vue JS
+- The best framework [Quasar](http://quasar.dev) :heart:
+- And it's extension QMarkdown !
 
-```bash
-quasar dev
-```
-
-### Lint the files
-
-```bash
-npm run lint
-```
-
-### Format the files
-
-```bash
-npm run format
-```
-
-### Build the app for production
-
-```bash
-quasar build
-```
-
-### Customize the configuration
-
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
+Also :
+- [Showdown JS](https://github.com/showdownjs/showdown)
+- [text-field-edit](https://www.npmjs.com/package/text-field-edit)
+- [indent-text-area](https://github.com/fregante/indent-textarea)

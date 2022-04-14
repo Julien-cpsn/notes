@@ -5,7 +5,7 @@ const routes = [
     children: [{ path: "", component: () => import("pages/Index.vue") }],
   },
   {
-    path: "/notes/",
+    path: "/notes",
     component: () => import("layouts/MarkdownEditorLayout.vue"),
     children: [{ path: "", component: () => import("pages/MarkdownEditor.vue") }],
   },

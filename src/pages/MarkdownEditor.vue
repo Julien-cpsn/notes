@@ -232,7 +232,6 @@
 	    <q-scroll-area ref="markdownScrollArea" style="height: 88vh; border-left: 1px solid rgba(0, 0, 0, 0.12); border-top: 1px solid rgba(0, 0, 0, 0.12); border-left: none !important" :visible="false" :thumb-style="{ display: 'none' }">
           <q-markdown
             :src="editorText"
-            :plugins="plugins"
             class="full-width full-height markdown text-left q-pt-sm q-px-lg q-pb-sm"
           />
 	    </q-scroll-area>
@@ -268,16 +267,6 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { QMarkdown } from '@quasar/quasar-app-extension-qmarkdown'
-import abbreviation from 'markdown-it-abbr'
-import deflist from 'markdown-it-deflist'
-import emoji from 'markdown-it-emoji'
-import footnote from 'markdown-it-footnote'
-import insert from 'markdown-it-ins'
-import mark from 'markdown-it-mark'
-import subscript from 'markdown-it-sub'
-import superscript from 'markdown-it-sup'
-import taskLists from 'markdown-it-task-lists'
-import markdownItMermaid from '@datatraccorporation/markdown-it-mermaid'
 import { copyToClipboard, exportFile, Notify, useMeta } from "quasar";
 import { api } from "boot/axios";
 import { architect, cayman, defaultTheme } from "src/store/html-themes";
@@ -292,18 +281,6 @@ export default defineComponent({
     QMarkdown
   },
   setup() {
-    const plugins = [
-      abbreviation,
-      deflist,
-      emoji,
-      footnote,
-      insert,
-      mark,
-      subscript,
-      superscript,
-      taskLists,
-      markdownItMermaid
-    ]
     window.Prism.languages = require('../../public/prism/prism')
 
     const markdownScrollArea = ref(null)
@@ -341,7 +318,6 @@ export default defineComponent({
 
     return {
       splitterModel: ref(45),
-      plugins,
 	    markdownScrollArea,
       insertArraySize,
 	    link,

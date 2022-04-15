@@ -635,9 +635,12 @@ window.onkeydown = (e) => {
   background-color: transparent!important
 
 pre[class*=language-]
-  background-color: transparent!important
+  background: transparent!important
   padding: 5px 5px!important
   margin: 0!important
+
+.token.operator
+  background: transparent!important
 
 .body--dark .editor
   color: white

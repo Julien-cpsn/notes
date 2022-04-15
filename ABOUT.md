@@ -5,6 +5,5 @@ markdown -> Word
 markdown -> PDF (real PDF, no ugly canva)
 import markdown
 multiples files with dedicated page to manage them
-dynamic Table Of Content (TOC)
 Semi-Rich editor ?
 LaTeX implementation ?

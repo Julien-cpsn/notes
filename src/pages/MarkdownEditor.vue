@@ -292,8 +292,8 @@
       </template>
     </q-splitter>
 
-    <!-- TOC TODO -->
-		<div v-show="advancedToolbar && editorText.trim() !== ''" class="toc absolute-top-right" :style="{ marginRight: isTocActive ? '0':'-175px' }">
+    <!-- TOC -->
+		<div v-show="advancedToolbar && editorText.trim() !== '' && /^#{0,4} /gm.test(editorText)" class="toc absolute-top-right" :style="{ marginRight: isTocActive ? '0':'-175px' }">
 			<q-btn
         flat
         round
@@ -309,7 +309,7 @@
         <div class="q-mt-xs text-center text-weight-medium">Table des matières</div>
         <q-separator class="q-mt-xs q-mb-sm" />
 				<div v-for="title of tocData.value" :key="title.id" class="q-my-auto text-no-wrap ellipsis">
-					{{ '&nbsp;&nbsp;'.repeat(title.level - 1)}}
+					{{ '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat(title.level - 1)}}
 					<a :href="'/notes#' + title.id" class="text-caption text-black" style="text-decoration: none">{{ title.label }}</a>
 				</div>
 			</div>
@@ -664,7 +664,8 @@ pre[class*=language-]
   max-height: 250px
   height: 200px
   margin-top: 8vh
-  z-index: 10000
+  z-index: 1000
+  transition: 0.3s margin-right
 
 .toc-data
   height: 100%
@@ -673,7 +674,7 @@ pre[class*=language-]
   overflow-x: hidden
   border-top-left-radius: 7px
   border-bottom-left-radius: 7px
-  box-shadow: 5px 4px 10px rgba(0, 0, 0, 0.25)
+  box-shadow: 5px 4px 9px rgba(0, 0, 0, 0.23)
   background-color: rgba(200, 200, 200, 0.3)
 
 ::-webkit-scrollbar

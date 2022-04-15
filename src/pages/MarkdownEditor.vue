@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex column">
+  <q-page class="flex column overflow-hidden">
     <div class="full-width flex row items-center q-py-xs q-px-sm" :class="$q.dark.isActive ? 'bg-grey-10':'bg-grey-2'" style="height: 5vh">
       <!-- BASIC FORMAT -->
       <div class="q-mx-xs">
@@ -145,12 +145,22 @@
         </q-btn-dropdown>
 
         <!-- EMOJIS -->
-        <q-btn-dropdown v-show="advancedToolbar" flat size="sm" padding="xs" icon="insert_emoticon" class="without-dropdown-icon" no-caps>
+        <q-btn-dropdown
+          v-show="advancedToolbar"
+          flat
+          size="sm"
+          padding="xs"
+          icon="insert_emoticon"
+          class="without-dropdown-icon"
+          no-caps
+
+          menu-self="bottom middle"
+        >
           <template v-slot:label>
             <q-tooltip class="text-no-wrap">Insérer un emoji</q-tooltip>
           </template>
 
-          <q-list dense class="flex row justify-between" style="max-width: 160px">
+          <q-list dense class="flex row justify-between" style="max-width: 280px">
             <q-item
               v-for="emoji in everyEmoji"
               :key="emoji[0]"
@@ -225,7 +235,7 @@
       </div>
 
       <div class="q-ml-auto q-mr-sm">
-        <span class="text-caption text-grey-8 q-mr-sm">Avancé</span>
+        <span class="text-caption text-grey-7 q-mr-sm">Avancé</span>
         <q-toggle dense size="xs" v-model="advancedToolbar"/>
       </div>
     </div>
@@ -272,11 +282,38 @@
       >
           <q-markdown
             :src="editorText"
+            :toc-start="tocRange.min"
+            :toc-end="tocRange.max"
+            toc
+            @data="(data) => { tocData.value = data }"
             class="full-width full-height markdown text-left q-pt-sm q-px-lg q-pb-sm"
           />
 	    </q-scroll-area>
       </template>
     </q-splitter>
+
+    <!-- TOC TODO -->
+		<div v-show="advancedToolbar && editorText.trim() !== ''" class="toc absolute-top-right" :style="{ marginRight: isTocActive ? '0':'-175px' }">
+			<q-btn
+        flat
+        round
+        color="primary"
+        size="md"
+        padding="none"
+        :icon="isTocActive ? 'chevron_right':'chevron_left'"
+        class="float-left"
+        style="margin: 110px 0 0 -30px"
+        @click="isTocActive = !isTocActive"
+      />
+			<div class="toc-data q-py-xs q-pl-sm q-pr-sm">
+        <div class="q-mt-xs text-center text-weight-medium">Table des matières</div>
+        <q-separator class="q-mt-xs q-mb-sm" />
+				<div v-for="title of tocData.value" :key="title.id" class="q-my-auto text-no-wrap ellipsis">
+					{{ '&nbsp;&nbsp;'.repeat(title.level - 1)}}
+					<a :href="'/notes#' + title.id" class="text-caption text-black" style="text-decoration: none">{{ title.label }}</a>
+				</div>
+			</div>
+		</div>
 
     <!-- EXPORT HTML -->
     <q-dialog v-model="exportToHtmlDialog">
@@ -360,6 +397,10 @@ export default defineComponent({
       'Ø',
     ]
 
+    const tocRange = { min: 1, max: 4 }
+    const tocData = ref({})
+    const isTocActive = ref(false)
+
     return {
       splitterModel: ref(45),
       insertArraySize,
@@ -368,7 +409,10 @@ export default defineComponent({
       exportToHtmlDialog,
       exportToHtmlTheme,
       specialCharacters,
-      everyEmoji
+      everyEmoji,
+      tocRange,
+      tocData,
+      isTocActive
     }
   },
   mounted() {
@@ -382,7 +426,7 @@ export default defineComponent({
     this.$refs.editorArea.addEventListener(
       'scroll',
       (value) => {
-          this.$refs.markdownScrollArea.setScrollPercentage('vertical', value.target.scrollTop / value.target.scrollHeight + 0.04);
+          this.$refs.markdownScrollArea.setScrollPercentage('vertical', value.target.scrollTop / value.target.scrollHeight);
         },
       true
     )
@@ -612,6 +656,25 @@ pre[class*=language-]
   hr
     border: none
     border-bottom: 2px solid lightgray
+
+.toc
+  min-width: 175px
+  max-width: 175px
+  min-height: 250px
+  max-height: 250px
+  height: 200px
+  margin-top: 8vh
+  z-index: 10000
+
+.toc-data
+  height: 100%
+  width: 100%
+  overflow-y: scroll
+  overflow-x: hidden
+  border-top-left-radius: 7px
+  border-bottom-left-radius: 7px
+  box-shadow: 5px 4px 10px rgba(0, 0, 0, 0.25)
+  background-color: rgba(200, 200, 200, 0.3)
 
 ::-webkit-scrollbar
   width: 3px

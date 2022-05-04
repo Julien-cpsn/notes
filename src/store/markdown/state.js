@@ -1,6 +1,6 @@
 export default function () {
   return {
-    fileName: 'note',
-    editorText: ''
+    files: [ { name: 'note', text: '' } ],
+    selectedFileIndex: 0,
   }
 }

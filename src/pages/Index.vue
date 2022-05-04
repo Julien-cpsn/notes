@@ -6,7 +6,7 @@
           <q-card-section class="q-pa-none">
             <q-img style="width: 200px!important; border-radius: 8px" class="full-width" src="notes_cropped.png">
               <div class="fixed-full flex items-center justify-center text-h3 text-center">
-                <router-link to="notes" class="text-weight-thin text-white" style="text-decoration: none">
+                <router-link to="/notes" class="text-weight-thin text-white" style="text-decoration: none">
                   <div>Notes</div>
                 </router-link>
                 <q-card-actions class="absolute-bottom justify-evenly">
@@ -24,35 +24,17 @@
         </q-card>
       </div>
     </div>
-
-    <q-dialog v-model="previewMarkdown" full-width>
-      <q-card>
-        <q-card-section>
-          <div class="text-center text-italic text-h6">{{ markdownFile.name }}</div>
-        </q-card-section>
-
-        <q-card-section class="q-py-none q-px-md">
-          <q-markdown :no-heading-anchor-links="true" :src="markdownFile.content" />
-        </q-card-section>
-
-        <q-card-actions class="q-pb-md" align="center">
-          <q-btn flat label="Fermer" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
 <script>
 import { defineComponent, ref } from "vue";
 import { QMarkdown } from '@quasar/quasar-app-extension-qmarkdown'
-import { Notify, useMeta } from "quasar";
+import { Notify, useMeta, useQuasar } from "quasar";
+import MarkdownPreviewDialog from "components/MarkdownPreviewDialog";
 
 export default defineComponent({
   name: "PageIndex",
-  components: {
-    QMarkdown
-  },
   setup() {
     useMeta(() => {
       return {
@@ -60,15 +42,27 @@ export default defineComponent({
       }
     })
 
-    const previewMarkdown = ref(false)
+    const $q = useQuasar()
+
     const markdownFile = ref()
 
     function openMarkdownPreviewDialog() {
       const reader = new FileReader()
       reader.readAsText(markdownFile.value, "UTF-8")
       reader.onload = (evt) => {
-        markdownFile.value.content = evt.target.result
-        previewMarkdown.value = true
+        $q.dialog({
+          component: MarkdownPreviewDialog,
+
+          componentProps: {
+            markdownFile: {
+              name: markdownFile.value.name,
+              text: evt.target.result
+            }
+          }
+        })
+          .onOk(() => {
+            markdownFile.value = null
+          })
       }
     }
 
@@ -81,7 +75,6 @@ export default defineComponent({
     }
 
     return {
-      previewMarkdown,
       markdownFile,
 
       openMarkdownPreviewDialog,

@@ -3,7 +3,7 @@
     <q-header>
       <q-toolbar>
         <router-link
-          to="/"
+          to="/notes"
           class="flex column justify-center q-ml-xs q-mr-md text-weight-thin text-white"
           style="text-decoration: none"
         >
@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import ToolbarActions from "components/ToolbarActions";
 
 export default defineComponent({
@@ -58,7 +58,7 @@ export default defineComponent({
   computed: {
     fileName: {
       get() {
-        return this.$store.state.markdown.fileName
+        return this.$store.getters['markdown/selectedFile'].name
       },
       set(value) {
         this.$store.commit('markdown/setFileName', value)

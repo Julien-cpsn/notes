@@ -34,14 +34,6 @@ export default {
     setCssVar('primary', this.themeColor)
   },
   computed: {
-    fileName: {
-      get() {
-        return this.$store.state.markdown.fileName
-      },
-      set(value) {
-        this.$store.commit('markdown/setFileName', value)
-      }
-    },
     darkMode() {
       return this.$store.state.user.darkMode
     },

@@ -416,6 +416,14 @@ export default defineComponent({
     }
   },
   mounted() {
+    const queryFileIndex = parseInt(this.$route.params.index)
+    if (queryFileIndex !== undefined && typeof queryFileIndex === 'number' && queryFileIndex >= 0 &&  queryFileIndex < this.$store.state.markdown.files.length) {
+      this.$store.commit('markdown/setSelectedFile', queryFileIndex)
+    }
+    else {
+      this.$router.push('/notes')
+    }
+
     useMeta(() => {
       return {
         title: `Notes ${ this.$store.getters["markdown/isFileNameValid"] ? (' | ' + this.fileName):'' }`
@@ -435,14 +443,14 @@ export default defineComponent({
     editorText: {
       get() {
         this.$nextTick( function() { window.Prism.highlightAll() })
-        return this.$store.state.markdown.editorText
+        return this.$store.getters['markdown/selectedFile'].text
       },
       set(value) {
         this.$store.commit('markdown/setEditorText', value)
       }
     },
     fileName() {
-      return this.$store.state.markdown.fileName
+      return this.$store.getters['markdown/selectedFile'].name
     },
     advancedToolbar: {
       get() {
@@ -541,7 +549,7 @@ export default defineComponent({
       }
 
       const status = exportFile(
-        this.$store.getters["markdown/fileNameEncoded"] + '.md',
+        this.$store.getters['markdown/fileNameEncoded'] + '.md',
         this.editorText
       )
 

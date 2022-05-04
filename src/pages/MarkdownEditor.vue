@@ -258,6 +258,8 @@
           style="min-height: 88.1vh;"
           type="textarea"
 
+          autofocus
+
           @keydown.ctrl.b.prevent.stop="formatSelectionDouble('**')"
 		      @keydown.ctrl.i.prevent.stop="formatSelectionDouble('*')"
           @keydown.ctrl.u.prevent.stop="formatSelectionDouble('~~')"
@@ -293,7 +295,11 @@
     </q-splitter>
 
     <!-- TOC -->
-		<div v-show="advancedToolbar && editorText.trim() !== '' && /^#{0,4} /gm.test(editorText)" class="toc absolute-top-right" :style="{ marginRight: isTocActive ? '0':'-175px' }">
+		<div
+      v-show="advancedToolbar && editorText.trim() !== '' && /^#{0,4} /gm.test(editorText)"
+      class="toc absolute-top-right"
+      :style="{ marginRight: isTocActive ? '0':'-173px' }"
+    >
 			<q-btn
         flat
         round
@@ -310,7 +316,7 @@
         <q-separator class="q-mt-xs q-mb-sm" />
 				<div v-for="title of tocData.value" :key="title.id" class="q-my-auto text-no-wrap ellipsis">
 					{{ '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat(title.level - 1)}}
-					<a :href="'/notes#' + title.id" class="text-caption text-black" style="text-decoration: none">{{ title.label }}</a>
+					<a :href="$route.path + '#' + title.id" class="toc-link text-caption text-black" style="text-decoration: none">{{ title.label }}</a>
 				</div>
 			</div>
 		</div>
@@ -687,6 +693,15 @@ pre[class*=language-]
   border-bottom-left-radius: 7px
   box-shadow: 5px 4px 9px rgba(0, 0, 0, 0.23)
   background-color: rgba(200, 200, 200, 0.3)
+  transition: 0.3s background-color
+
+.toc-data:hover
+  background-color: rgba(185, 185, 185, 0.8)
+  transition: 0.3s background-color
+
+.toc-link:hover::before
+  content: '–'
+  color: $primary
 
 ::-webkit-scrollbar
   width: 3px

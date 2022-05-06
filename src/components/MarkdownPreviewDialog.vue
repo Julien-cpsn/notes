@@ -5,7 +5,7 @@
         <div class="text-center text-italic text-h6">{{ markdownFile.name }}</div>
       </q-card-section>
 
-      <q-card-section class="q-py-none q-px-md">
+      <q-card-section class="q-py-none q-px-xl">
         <q-markdown :no-heading-anchor-links="true" :src="markdownFile.text" />
       </q-card-section>
 

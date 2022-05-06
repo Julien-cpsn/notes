@@ -229,7 +229,7 @@
           <q-tooltip class="text-no-wrap">Télécharger au format PDF</q-tooltip>
         </q-btn>
 
-        <q-btn v-show="advancedToolbar" flat size="sm" padding="xs" icon="html" @click="exportToHtmlDialog = true" :disable="!$store.getters['markdown/isFileNameValid']">
+        <q-btn v-show="advancedToolbar" flat size="sm" padding="xs" icon="html" @click="saveMarkdownAsHtml" :disable="!$store.getters['markdown/isFileNameValid']">
           <q-tooltip class="text-no-wrap">Télécharger au format HTML</q-tooltip>
         </q-btn>
       </div>
@@ -320,32 +320,6 @@
 				</div>
 			</div>
 		</div>
-
-    <!-- EXPORT HTML -->
-    <q-dialog v-model="exportToHtmlDialog">
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">Choisir un thème</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none q-my-sm">
-          <div class="flex row">
-            <q-radio v-model="exportToHtmlTheme" :val="0" label="Aucun" class="q-mr-md"/>
-            <q-radio v-model="exportToHtmlTheme" :val="1" class="q-mr-md">
-              <q-img width="100px" class="rounded-borders" src="https://raw.githubusercontent.com/pages-themes/architect/master/thumbnail.png"/>
-            </q-radio>
-            <q-radio v-model="exportToHtmlTheme" :val="2" class="q-mr-md">
-              <q-img width="100px" class="rounded-borders" src="https://raw.githubusercontent.com/pages-themes/cayman/master/thumbnail.png"/>
-            </q-radio>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="Exporter" color="primary" @click="saveMarkdownAsHtml" v-close-popup />
-          <q-btn flat label="Annuler" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
@@ -353,13 +327,13 @@
 import { defineComponent, ref } from "vue";
 import { QMarkdown } from '@quasar/quasar-app-extension-qmarkdown'
 import { copyToClipboard, exportFile, Notify, useMeta } from "quasar";
-import { api } from "boot/axios";
 import { architect, cayman, defaultTheme } from "src/store/html-themes";
 import * as textFieldEdit from 'text-field-edit';
 import * as indentation from 'indent-textarea';
 import showdown from 'showdown'
 import showdownMermaid from 'showdown-mermaid'
 import { everyEmoji } from "src/store/emojis-list";
+import ThemeSelectionDialog from "components/ThemeSelectionDialog";
 
 export default defineComponent({
   name: "MarkdownEditor",
@@ -373,8 +347,6 @@ export default defineComponent({
     const insertArraySize = ref({ x: 2, y: 2 })
 	  const link = ref({ text: '', link: '' })
     const importMarkdown = ref()
-    const exportToHtmlDialog = ref(false)
-    const exportToHtmlTheme = ref(0)
 
     const specialCharacters = [
       '¤',
@@ -412,8 +384,6 @@ export default defineComponent({
       insertArraySize,
 	    link,
       importMarkdown,
-      exportToHtmlDialog,
-      exportToHtmlTheme,
       specialCharacters,
       everyEmoji,
       tocRange,
@@ -572,54 +542,93 @@ export default defineComponent({
         return
       }
 
-      const converter = new showdown.Converter({
-        openLinksInNewWindow: true,
-        parseImgDimensions: true,
-        simplifiedAutoLink: true,
-        strikethrough: true,
-        tables: true,
-        tablesHeaderId: true,
-        tasklists: true,
-        emoji: true,
-        extensions: [showdownMermaid]
+      this.$q.dialog({
+        component: ThemeSelectionDialog,
       })
-      const html = converter.makeHtml(this.editorText)
-      let theme = defaultTheme
-      switch (this.exportToHtmlTheme) {
-        case 2:
-          theme = cayman
-          break
-        case 1:
-          theme = architect
-          break
-        default:
-          theme = defaultTheme
-          break
-      }
+        .onOk(selectedTheme => {
+          const converter = new showdown.Converter({
+            openLinksInNewWindow: true,
+            parseImgDimensions: true,
+            simplifiedAutoLink: true,
+            strikethrough: true,
+            tables: true,
+            tablesHeaderId: true,
+            tasklists: true,
+            emoji: true,
+            extensions: [showdownMermaid]
+          })
 
-      const status = exportFile(
-        this.$store.getters['markdown/fileNameEncoded'] + '.html',
-        theme.replace(/\{\{ title \}\}/gm, this.fileName).replace('{{ content }}', html)
-      )
+          const html = converter.makeHtml(this.editorText)
 
-      if (status !== true) {
-        Notify.create({
-          type: 'positive',
-          message: "Le fichier n'a pas pu être enregistré",
-          time: 400
+          let theme = defaultTheme
+          switch (selectedTheme) {
+            case 2:
+              theme = cayman
+              break
+            case 1:
+              theme = architect
+              break
+            default:
+              theme = defaultTheme
+              break
+          }
+
+          const status = exportFile(
+            this.$store.getters['markdown/fileNameEncoded'] + '.html',
+            theme.replace(/\{\{ title \}\}/gm, this.fileName).replace('{{ content }}', html)
+          )
+
+          if (status !== true) {
+            Notify.create({
+              type: 'positive',
+              message: "Le fichier n'a pas pu être enregistré",
+              time: 400
+            })
+          }
         })
-      }
     },
     saveMarkdownAsPdf() {
       if (!this.$store.getters['markdown/isFileNameValid']) {
         return
       }
 
-      const data = new FormData()
-      data.append('input_files[]', this.editorText)
-      api.post('/convert', data,{ headers: { "Content-Type": "multipart/form-data" }})
-        .then((response) => {
-          console.log(response);
+      this.$q.dialog({
+        component: ThemeSelectionDialog,
+      })
+        .onOk(selectedTheme => {
+          let theme = defaultTheme
+          switch (selectedTheme) {
+            case 2:
+              theme = cayman
+              break
+            case 1:
+              theme = architect
+              break
+            default:
+              theme = defaultTheme
+              break
+          }
+
+          const converter = new showdown.Converter({
+            openLinksInNewWindow: true,
+            parseImgDimensions: true,
+            simplifiedAutoLink: true,
+            strikethrough: true,
+            tables: true,
+            tablesHeaderId: true,
+            tasklists: true,
+            emoji: true,
+            extensions: [showdownMermaid]
+          })
+          let windowToPrint = window.open('')
+          windowToPrint.document.open()
+          windowToPrint.document.write(theme.replace(/\{\{ title \}\}/gm, this.fileName).replace('{{ content }}', converter.makeHtml(this.editorText)))
+          windowToPrint.document.close()
+          setTimeout(() => {
+            windowToPrint.focus()
+            windowToPrint.print()
+            windowToPrint.close()
+          }, 500)
         })
     },
     roundSplitterModel(value) {
@@ -652,6 +661,21 @@ pre[class*=language-]
   background: transparent!important
   padding: 5px 5px!important
   margin: 0!important
+
+[id^=drender]
+  transform: scale(0.75) translateY(20%) translateX(-15%)
+  position: absolute
+  bottom: 10px
+  left: 10px
+
+[id^=drender]:before
+  margin-left: -25px
+  margin-right: -45px
+  content: 'Recharger la page'
+  font-size: 12px
+  color: grey
+  display: inline-block
+  transform: rotate(-90deg) translateY(-100%) translateX(50%)
 
 .token.operator
   background: transparent!important

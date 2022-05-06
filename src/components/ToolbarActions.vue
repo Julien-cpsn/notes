@@ -7,7 +7,7 @@
   <q-btn flat round class="q-mr-sm" size="md" padding="sm" :icon="darkMode ? 'light_mode':'dark_mode'" @click="toggleDarkMode"/>
 
   <q-icon class="q-mr-sm" name="info" size="sm">
-    <q-tooltip ref="TODOS" id="TODOS" class="text-no-wrap" :hide-delay="1000">
+    <q-tooltip ref="TODOS" id="TODOS" class="text-no-wrap">
       <q-markdown class="q-px-sm" :src="ABOUT"/>
     </q-tooltip>
   </q-icon>

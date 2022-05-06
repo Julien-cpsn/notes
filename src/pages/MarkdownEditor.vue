@@ -213,7 +213,7 @@
         </q-btn>
 
         <q-btn flat size="sm" padding="xs" icon="file_upload" @click="pickFiles">
-          <q-tooltip class="text-no-wrap">Importer un fichier</q-tooltip>
+          <q-tooltip class="text-no-wrap">Importer un fichier<br><b>(Remplace tout le contenu)</b></q-tooltip>
         </q-btn>
         <q-file ref="importMarkdownPicker" class="hidden" accept=".md" v-model="importMarkdown" @update:model-value="importMarkdownFile" @rejected="rejectFile"/>
 
